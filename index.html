@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+  <title>Unity Web Player | OneButtonActionEndless</title>
+
+  <link rel="shortcut icon" href="TemplateData/favicon.ico">
+  <link rel="stylesheet" href="TemplateData/style.css">
+
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #unity-container {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+      background: #000;
+    }
+
+    #unity-canvas {
+      display: block;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #000;
+      touch-action: none;
+    }
+
+    #unity-loading-bar {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    #unity-warning {
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+
+    #unity-footer {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="unity-container" class="unity-mobile">
+
+    <canvas id="unity-canvas"
+            width="1080"
+            height="1920"
+            tabindex="-1"></canvas>
+
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
+      </div>
+    </div>
+
+    <div id="unity-warning"></div>
+
+    <div id="unity-footer">
+      <div id="unity-logo-title-footer"></div>
+      <div id="unity-fullscreen-button"></div>
+      <div id="unity-build-title">
+        OneButtonActionEndless
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+
+    var canvas =
+      document.querySelector("#unity-canvas");
+
+    var warningBanner =
+      document.querySelector("#unity-warning");
+
+
+    // Unity警告表示
+    function unityShowBanner(msg, type) {
+
+      function updateBannerVisibility() {
+        warningBanner.style.display =
+          warningBanner.children.length
+            ? "block"
+            : "none";
+      }
+
+      var div = document.createElement("div");
+      div.textContent = msg;
+
+      warningBanner.appendChild(div);
+
+      if (type === "error") {
+        div.style =
+          "background: red; padding: 10px;";
+      } else {
+
+        if (type === "warning") {
+          div.style =
+            "background: yellow; padding: 10px;";
+        }
+
+        setTimeout(function () {
+
+          if (div.parentNode) {
+            warningBanner.removeChild(div);
+          }
+
+          updateBannerVisibility();
+
+        }, 5000);
+      }
+
+      updateBannerVisibility();
+    }
+
+
+    // Unityビルド設定
+    var buildUrl = "Build";
+
+    var loaderUrl =
+      buildUrl +
+      "/OneButtonjumpActionEndless.loader.js";
+
+    var config = {
+
+      arguments: [],
+
+      dataUrl:
+        buildUrl +
+        "/OneButtonjumpActionEndless.data.unityweb",
+
+      frameworkUrl:
+        buildUrl +
+        "/OneButtonjumpActionEndless.framework.js.unityweb",
+
+      codeUrl:
+        buildUrl +
+        "/OneButtonjumpActionEndless.wasm.unityweb",
+
+      streamingAssetsUrl: "StreamingAssets",
+
+      companyName: "DefaultCompany",
+
+      productName: "OneButtonActionEndless",
+
+      productVersion: "1.0",
+
+      showBanner: unityShowBanner
+    };
+
+
+    // 画面サイズ自動調整
+    function resizeGame() {
+
+      canvas.style.setProperty(
+        "width",
+        "100%",
+        "important"
+      );
+
+      canvas.style.setProperty(
+        "height",
+        "100%",
+        "important"
+      );
+
+    }
+
+
+    // 端末の画面サイズ変更に対応
+    window.addEventListener(
+      "resize",
+      resizeGame
+    );
+
+    if (window.visualViewport) {
+
+      window.visualViewport.addEventListener(
+        "resize",
+        resizeGame
+      );
+
+    }
+
+    resizeGame();
+
+
+    // Unity読み込み
+    document.querySelector(
+      "#unity-loading-bar"
+    ).style.display = "block";
+
+    var script = document.createElement("script");
+
+    script.src = loaderUrl;
+
+    script.onload = () => {
+
+      createUnityInstance(
+        canvas,
+        config,
+        (progress) => {
+
+          document.querySelector(
+            "#unity-progress-bar-full"
+          ).style.width =
+            (100 * progress) + "%";
+
+        }
+
+      ).then((unityInstance) => {
+
+        document.querySelector(
+          "#unity-loading-bar"
+        ).style.display = "none";
+
+        resizeGame();
+
+      }).catch((message) => {
+
+        alert(message);
+
+      });
+
+    };
+
+    document.body.appendChild(script);
+
+  </script>
+
+</body>
+</html>
